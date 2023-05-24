@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Xi3jzQfdOX4bj4fpLguWkIsnj5FSxfID664RAY/pxuMgzd/qfCQYAvjLSJleYeIZn9M3Kkj84Qlx7dbQqllq4w==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Lenovo\\Desktop\\Šola\\III LETNIK\\TEORIJA\\NPA\\weatherapp\\weatherapp\\weatherapp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Lenovo\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
