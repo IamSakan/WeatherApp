@@ -18,3 +18,4 @@ C:\Users\Lenovo\Desktop\Šola\III LETNIK\TEORIJA\NPA\weatherapp\weatherapp\obj\D
 C:\Users\Lenovo\Desktop\Šola\III LETNIK\TEORIJA\NPA\weatherapp\weatherapp\obj\Debug\net6.0-windows\ref\weatherapp.dll
 C:\Users\Lenovo\Desktop\Šola\III LETNIK\TEORIJA\NPA\weatherapp\weatherapp\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
 C:\Users\Lenovo\Desktop\Šola\III LETNIK\TEORIJA\NPA\weatherapp\weatherapp\obj\Debug\net6.0-windows\weatherapp.csproj.CopyComplete
+C:\Users\Lenovo\Desktop\Šola\III LETNIK\TEORIJA\NPA\weatherapp\weatherapp\obj\Debug\net6.0-windows\weatherapp.MoreInfo.resources

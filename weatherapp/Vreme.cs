@@ -1,54 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace weatherapp
+﻿namespace weatherapp
 {
-    internal class Vreme
+    public class Vreme
     {
-        public class coord
+        public class Coord
         {
-            public double lon { get; set; }
-            public double lat { get; set; }
+            public double lon;
+            public double lat;
         }
 
-        public class weather
+        public class Weather
         {
-            public string main { get; set; }
-            public string description { get; set; }
-            public string Icon { get; set; }
+            public string main;
+            public string description;
+            public string Icon;
         }
 
-        public class main
+        public class Main
         {
-            public double temp { get; set; }
-            public double feels_like { get; set; }
-            public double temp_min { get; set; }
-            public double temp_max { get; set; }
-            public double humidity { get; set; }
+            public double temp;
+            public double feels_like;
+            public double temp_min;
+            public double temp_max;
+            public double humidity;
         }
 
-        public class sys
+        public class Sys
         {
-            public long sunrise { get; set; }
-            public long sunset { get; set; }
-            public int cod { get; set; }
+            public long sunrise;
+            public long sunset;
+            public int cod;
+            public string country;
         }
 
-        public class wind
+        public class Wind
         {
-            public double speed { get; set; }
+            public double speed;
         }
-        public class root
+        public class Root
         {
-            public coord coord { get; set; }
-            public List <weather> weather { get; set; }
-            public main main { get; set; }
-            public sys sys { get; set; }
-            public wind wind { get; set; }
+            public Coord coord { get; set; }
+            public List <Weather> weather { get; set; }
+            public Main main { get; set; }
+            public Sys sys { get; set; }
+            public Wind wind { get; set; }
             public int timezone { get; set; }
+            public string name { get; set; }
 
         }
 

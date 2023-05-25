@@ -1,19 +1,15 @@
-using Microsoft.VisualBasic.ApplicationServices;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Windows.Forms;
-using static weatherapp.Vreme;
 
 namespace weatherapp
 {
     public partial class Form1 : Form
     {
+        private MoreInfo moreInfo;
         private string APIKey = "2a4106053bcff7e70287a9b3f3088d4c";
         private string searchHistoryFile = "search_history.txt";
+        private Vreme.Root WeatherInfo;
+        private bool isFullscreen = false;
 
         public Form1()
         {
@@ -23,9 +19,19 @@ namespace weatherapp
             pictureBoxHumidity.Image = Image.FromFile("humidity.png");
             pictureBoxWind.Image = Image.FromFile("wind.png");
 
+            pictureBox2.BackColor = Color.FromArgb(125, Color.White);
+            pictureBox3.BackColor = Color.FromArgb(125, Color.White);
+            pictureBoxHumidity.BackColor = Color.FromArgb(125, Color.White);
+            pictureBoxWind.BackColor = Color.FromArgb(125, Color.White);
+
             comboBoxMesto.KeyDown += ComboBoxMesto_KeyDown;
             LoadSearchHistory();
-            buttonOblacila.Enabled = false; 
+            buttonOblacila.Enabled = false;
+            panel1.BackColor = Color.FromArgb(125, Color.Black);
+            buttonSearch.BackColor = Color.FromArgb(125, Color.Black);
+            pictureBoxWeather.BackColor = Color.FromArgb(125, Color.Black);
+            buttonMoreInfo.Enabled = false;
+            comboBoxMesto.Select(); // da lahko takoj pišemo, brez da bi morali pritisniti na comboBox
 
         }
 
@@ -37,12 +43,39 @@ namespace weatherapp
 
         void ComboBoxMesto_KeyDown(object sender, KeyEventArgs e)
         {
-            // Check if the Enter key is pressed
+            if (WindowState == FormWindowState.Maximized)
+            {
+                isFullscreen = true;
+            }
+            // preveri èe pritisnemo enter in poklièe funkcijo 
             if (e.KeyCode == Keys.Enter)
             {
                 getWeather();
                 e.SuppressKeyPress = true;
+            }   
+            // f11 za fullscreen
+            else if (e.KeyCode == Keys.F11)
+            {
+                if (isFullscreen)
+                {
+                    // exit fullscreen mode
+                    this.FormBorderStyle = FormBorderStyle.Sizable;
+                    this.WindowState = FormWindowState.Normal;
+                    isFullscreen = false;
+                }
+                else
+                {
+                    // enter fullscreen mode
+                    //this.FormBorderStyle = FormBorderStyle.None; // ni mi všeè
+                    this.WindowState = FormWindowState.Maximized;
+                    isFullscreen = true;
+                    ShowFullscreenMessage();
+                }
             }
+        }
+        private void ShowFullscreenMessage()
+        {
+            MessageBox.Show("Press F11 again to exit fullscreen mode.", "Fullscreen Mode", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         string clothingRecommendation = "";
@@ -56,35 +89,35 @@ namespace weatherapp
                     string searchText = comboBoxMesto.Text.Trim();
                     string url = $"https://api.openweathermap.org/data/2.5/weather?q={searchText}&appid={APIKey}";
                     var json = web.DownloadString(url);
-                    Vreme.root Info = JsonConvert.DeserializeObject<Vreme.root>(json);
-                    pictureBoxWeather.ImageLocation = Info.weather[0].Icon + ".png";
+                    Vreme.Root Info = JsonConvert.DeserializeObject<Vreme.Root>(json);
+                    pictureBoxWeather.ImageLocation = Info.weather[0].Icon + ".png"; // ni delalo èe load-am sliko prek url-ja, pa sem naložil vse slike (ni jih velik)
                     timezone = Info.timezone;
                     labelCondition.Text = Info.weather[0].main;
                     labelDetails.Text = Info.weather[0].description;
-                    labelSunrise.Text = pretvarjanjeCasa(Info.sys.sunrise, timezone).ToShortTimeString();
+                    labelSunrise.Text = pretvarjanjeCasa(Info.sys.sunrise, timezone).ToShortTimeString(); // da izpiše samo èas brez datuma, sekund..
                     labelSunset.Text = pretvarjanjeCasa(Info.sys.sunset, timezone).ToShortTimeString();
-                    SaveSearchHistory(searchText); // shrani zgodovino iskanja
+                    SaveSearchHistory(Info.name); // shrani zgodovino iskanja
 
-                    labelTemp.Text = Math.Round((Info.main.temp - 273), 0).ToString() + "°C";
-                    labelMinTemp.Text = Math.Round((Info.main.temp_min - 273), 0).ToString() + "°C";
-                    labelMaxTemp.Text = Math.Round((Info.main.temp_max - 273), 0).ToString() + "°C";
-                    labelFeelsLike.Text = Math.Round((Info.main.feels_like - 273), 0).ToString() + "°C";
-                    labelWind.Text = Math.Round((Info.wind.speed * 3.6), 1).ToString() + "km/h";
-                    labelHumidity.Text = Info.main.humidity.ToString() + "%";
+                    labelTemp.Text = Math.Round((Info.main.temp - 273), 0).ToString() + "°C"; // iz kelvinov v stopinje C pretvorimo da odštejemo 273
+                    labelWind.Text = Math.Round((Info.wind.speed * 3.6), 1).ToString() + "km/h"; // pretvorimo iz m/s v km/h
+                    labelHumidity.Text = Info.main.humidity.ToString() + "%"; 
                     
-                    labelMestoDisp.Text = comboBoxMesto.Text;
-                    if (Info.weather[0].main.ToLower() == "rain")
+                    labelMestoDisp.Text = Info.name;
+                    if (Info.weather[0].main.ToLower() == "rain") // ce je dez, objektu damo vrednost true za dez in false za sonce
                     {
                         Oblacila currentWeather = new Oblacila(Info.main.temp - 273, true, false);
-                        clothingRecommendation = currentWeather.GetClothingRecommendation();
+                        clothingRecommendation = currentWeather.GetClothingRecommendation(); // klic funkcije
                     }
 
-                    else if(Info.weather[0].main.ToLower() == "clouds" || Info.weather[0].main.ToLower() == "sunny" || Info.weather[0].main.ToLower() == "clear")
+                    else if(Info.weather[0].main.ToLower() == "clouds" || Info.weather[0].main.ToLower() == "sunny" || Info.weather[0].main.ToLower() == "clear") 
                     {
                         Oblacila currentWeather = new Oblacila(Info.main.temp - 273, false, true);
                         clothingRecommendation = currentWeather.GetClothingRecommendation();
                     }
-                    buttonOblacila.Enabled = true;
+                    buttonOblacila.Enabled = true; 
+                    buttonMoreInfo.Enabled = true;
+                    WeatherInfo = Info; // v spremenljivko, ki jo pošljemo v drug forms, zapišemo vrednosti ki jih prebere objekt Info
+                
 
                 }
                 catch (WebException ex)
@@ -95,19 +128,19 @@ namespace weatherapp
         }
         
 
-        DateTime pretvarjanjeCasa(long ms, int timezone)
+        DateTime pretvarjanjeCasa(long ms, int timezone) 
         {
-            int hec = timezone / 3600; //tle bo zdaj 2, js sm meu prej 1
+            int idk = timezone / 3600; // ker sem ugotovil da je 3600 edina ki je pravilno delovala na zaèetku, sem jo vzel kot osnovno
             DateTime day; 
             if (timezone > 0) 
             {
-                day = new DateTime(1970, 1, 1,Math.Abs(hec-1), 0, 0, 0, DateTimeKind.Utc).ToLocalTime(); //leto mesec dan ura minuta sekunda milisekunda
+                day = new DateTime(1970, 1, 1,Math.Abs(idk-1), 0, 0, 0, DateTimeKind.Utc).ToLocalTime(); // leto mesec dan ura minuta sekunda milisekunda
                 day = day.AddSeconds(ms).ToLocalTime();
             }
 
-            else //to je zdj za negativne
+            else // za negativne vrednosti spremenljivke timezone
             {
-                day = new DateTime(1970, 1, 1,23 - Math.Abs(hec), 0, 0, 0, DateTimeKind.Utc).ToLocalTime(); 
+                day = new DateTime(1970, 1, 1,23 - Math.Abs(idk), 0, 0, 0, DateTimeKind.Utc).ToLocalTime(); 
                 day = day.AddSeconds(ms).ToLocalTime();
             }
             return day;
@@ -121,22 +154,22 @@ namespace weatherapp
 
                 if (File.Exists(searchHistoryFile))
                 {
-                    searchHistory = File.ReadAllLines(searchHistoryFile).ToList();
-                    searchHistory.Remove(searchText);
+                    searchHistory = File.ReadAllLines(searchHistoryFile).ToList(); // èe datoteka obstaja, prebere vse vrstice iz datoteke in jih pretvori v list
+                    searchHistory.Remove(searchText); // odstrani niz èe je že prisoten v seznamu / da ne bi prišlo do ponavljanja
                 }
 
-                searchHistory.Insert(0, searchText);
+                searchHistory.Insert(0, searchText); // zapis na prvo mesto
 
-                if (searchHistory.Count > 5)
+                if (searchHistory.Count > 5)  
                 {
-                    searchHistory = searchHistory.Take(5).ToList();
+                    searchHistory = searchHistory.Take(5).ToList(); // èe je veè ko 5 zapisov izberemo prvih 5 in jih zapišemo v list
                 }
 
-                File.WriteAllLines(searchHistoryFile, searchHistory);
+                File.WriteAllLines(searchHistoryFile, searchHistory); //zapis novih 5
             }
             catch (IOException ex)
             {
-                // Handle the exception, e.g., display an error message
+                // v primeru napake izpiše error, ni delalo brez tega.
                 MessageBox.Show("An error occurred while saving the search history.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -149,14 +182,14 @@ namespace weatherapp
                 if (File.Exists(searchHistoryFile))
                 {
                     List<string> searchHistory = File.ReadAllLines(searchHistoryFile).ToList();
-                    int startIndex = Math.Max(0, searchHistory.Count - 5); // Get the starting index based on the number of items to display
-                    List<string> latestSearches = searchHistory.GetRange(startIndex, Math.Min(5, searchHistory.Count)); // Get the latest 5 items or less
-                    comboBoxMesto.Items.AddRange(latestSearches.ToArray());
+                    int startIndex = Math.Max(0, searchHistory.Count - 5); // glede na število elementov, vrne najveèje število, kar je indeks zadnjega elementa
+                    List<string> latestSearches = searchHistory.GetRange(startIndex, Math.Min(5, searchHistory.Count)); // GetRange() - za izbiro podseznama na podlagi zaèetnega indeksa in števila elementov.
+                    comboBoxMesto.Items.AddRange(latestSearches.ToArray()); // AddRange() - za dodajanje veè elementov hkrati
                 }
             }
             catch (IOException ex)
             {
-                // Handle the exception, e.g., display an error message
+                // Pri napaènem vnosu, vrne error
                 MessageBox.Show("An error occurred while loading the search history.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -165,6 +198,21 @@ namespace weatherapp
         public void buttonOblacila_Click(object sender, EventArgs e)
         {
             MessageBox.Show(clothingRecommendation, "Our recommendation for your clothes based on current weather:", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+        }
+
+        private void buttonMoreInfo_Click(object sender, EventArgs e)
+        {
+            if (moreInfo == null || moreInfo.IsDisposed)
+            {
+                moreInfo = new MoreInfo(WeatherInfo); // da lahko izpišem potrebne stvari
+            }
+
+            moreInfo.Show();
+        }
+
+        private void buttonClose_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace weatherapp
+﻿namespace weatherapp
 {
     public class Oblacila
     {
@@ -33,7 +27,7 @@ namespace weatherapp
                 }
                 else if (Temperature > 10)
                 {
-                    return "You should wear a little warmer clothes but nothing too much, it's still very warm.";
+                    return "You should wear a little warmer clothes, but nothing too much, it's still very warm.";
                 }
                 else
                 {
